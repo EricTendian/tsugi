@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "c5196e8f17fb4af1b7ac7a35b5f8da27",
+    "content-hash": "aa6b28c112b7a80355e3e4c042978058",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -836,13 +836,13 @@
             "version": "dev-master",
             "source": {
                 "type": "git",
-                "url": "https://github.com/tsugiproject/tsugi-php.git",
-                "reference": "5c16451bb6b838ea997544d2409b88606420bc56"
+                "url": "https://github.com/EricTendian/tsugi-php.git",
+                "reference": "15aa553c1b338ecb93800a7f549a819994ed6cfe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tsugiproject/tsugi-php/zipball/5c16451bb6b838ea997544d2409b88606420bc56",
-                "reference": "5c16451bb6b838ea997544d2409b88606420bc56",
+                "url": "https://api.github.com/repos/EricTendian/tsugi-php/zipball/15aa553c1b338ecb93800a7f549a819994ed6cfe",
+                "reference": "15aa553c1b338ecb93800a7f549a819994ed6cfe",
                 "shasum": ""
             },
             "require": {
@@ -859,7 +859,6 @@
                     "phpunit.xml.dist"
                 ]
             },
-            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "Apache-2.0"
             ],
@@ -873,7 +872,10 @@
             ],
             "description": "The PHP Library to build interoperable learning tools",
             "homepage": "http://www.tsugi.org/",
-            "time": "2017-03-22T04:06:15+00:00"
+            "support": {
+                "source": "https://github.com/EricTendian/tsugi-php/tree/master"
+            },
+            "time": "2017-04-03T21:42:53+00:00"
         },
         {
             "name": "twig/twig",
