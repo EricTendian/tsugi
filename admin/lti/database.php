@@ -46,7 +46,7 @@ array( "{$CFG->dbprefix}lti_key",
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE(key_sha256),
     PRIMARY KEY (key_id)
@@ -69,7 +69,7 @@ array( "{$CFG->dbprefix}lti_context",
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_context_ibfk_1`
         FOREIGN KEY (`key_id`)
@@ -97,7 +97,7 @@ array( "{$CFG->dbprefix}lti_link",
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_link_ibfk_1`
         FOREIGN KEY (`context_id`)
@@ -128,7 +128,7 @@ array( "{$CFG->dbprefix}lti_user",
     ipaddr              VARCHAR(64),
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_user_ibfk_1`
         FOREIGN KEY (`key_id`)
@@ -153,7 +153,7 @@ array( "{$CFG->dbprefix}lti_membership",
 
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_membership_ibfk_1`
         FOREIGN KEY (`context_id`)
@@ -182,7 +182,7 @@ array( "{$CFG->dbprefix}lti_service",
     json                MEDIUMTEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_service_ibfk_1`
         FOREIGN KEY (`key_id`)
@@ -216,7 +216,7 @@ array( "{$CFG->dbprefix}lti_result",
     json               MEDIUMTEXT NULL,
     entity_version     INTEGER NOT NULL DEFAULT 0,
     created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at         TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     retrieved_at       DATETIME NULL,
 
     CONSTRAINT `{$CFG->dbprefix}lti_result_ibfk_1`
@@ -255,7 +255,7 @@ array( "{$CFG->dbprefix}lti_nonce",
 
 array( "{$CFG->dbprefix}lti_domain",
 "create table {$CFG->dbprefix}lti_domain (
-    domain_id   INTEGER NOT NULL AUTO_INCREMENT PRIMARY_KEY,
+    domain_id   INTEGER NOT NULL AUTO_INCREMENT,
     key_id      INTEGER NOT NULL,
     context_id  INTEGER NULL,
     domain      VARCHAR(128),
@@ -276,7 +276,8 @@ array( "{$CFG->dbprefix}lti_domain",
         REFERENCES `{$CFG->dbprefix}lti_context` (`context_id`)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
-    UNIQUE(key_id, context_id, domain, port)
+    UNIQUE(key_id, context_id, domain, port),
+    PRIMARY KEY (domain_id)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
 
 // Profile is denormalized and not tightly connected to allow
@@ -298,7 +299,7 @@ array( "{$CFG->dbprefix}profile",
     login_at            DATETIME NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE(profile_id, profile_sha256),
     PRIMARY KEY (profile_id)
