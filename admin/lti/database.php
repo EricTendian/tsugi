@@ -46,7 +46,7 @@ array( "{$CFG->dbprefix}lti_key",
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
 
     UNIQUE(key_sha256),
     PRIMARY KEY (key_id)
@@ -255,7 +255,7 @@ array( "{$CFG->dbprefix}lti_nonce",
 
 array( "{$CFG->dbprefix}lti_domain",
 "create table {$CFG->dbprefix}lti_domain (
-    domain_id   INTEGER NOT NULL AUTO_INCREMENT,
+    domain_id   INTEGER NOT NULL AUTO_INCREMENT PRIMARY_KEY,
     key_id      INTEGER NOT NULL,
     context_id  INTEGER NULL,
     domain      VARCHAR(128),
@@ -276,8 +276,7 @@ array( "{$CFG->dbprefix}lti_domain",
         REFERENCES `{$CFG->dbprefix}lti_context` (`context_id`)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
-    UNIQUE(key_id, context_id, domain, port),
-    PRIMARY KEY (domain_id)
+    UNIQUE(key_id, context_id, domain, port)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
 
 // Profile is denormalized and not tightly connected to allow
