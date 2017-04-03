@@ -6,6 +6,7 @@
 .Spotlight-V100
 .Trashes
 .idea
+.env
 *.swp
 *.bak
 ehthumbs.db

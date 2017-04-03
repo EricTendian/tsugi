@@ -21,6 +21,11 @@ $dirroot = realpath(dirname(__FILE__));
 
 require_once($dirroot."/vendor/autoload.php");
 
+$dotenv = new Dotenv\Dotenv(__DIR__);
+$dotenv->load();
+
+$wwwroot = env("APP_URL", "http://localhost/tsugi");
+
 // We store the configuration in a global object
 // Additional documentation on these fields is
 // available in that class or in the PHPDoc for that class
@@ -36,10 +41,10 @@ unset($apphome);
 // You need to point this at a database with am account and password
 // that can create tables.   To make the initial tables go into Admin
 // to run the upgrade.php script which auto-creates the tables.
-$CFG->pdo       = 'mysql:host=127.0.0.1;dbname=tsugi';
+$CFG->pdo       = 'mysql:host='.env('TSUGI_DB_HOST', '127.0.0.1').';dbname='.env('TSUGI_DB', 'tsugi');
 // $CFG->pdo       = 'mysql:host=127.0.0.1;port=8889;dbname=tsugi'; // MAMP
-$CFG->dbuser    = 'ltiuser';
-$CFG->dbpass    = 'ltipassword';
+$CFG->dbuser    = env('TSUGI_DB_USER', 'ltiuser');
+$CFG->dbpass    = env('TSUGI_DB_PASS', 'ltipassword');
 
 // You can use the CDN copy of the static content - it is the
 // default unless you override it.
@@ -57,13 +62,13 @@ $CFG->dbpass    = 'ltipassword';
 // can make a separate database for each instance of TSUGI.
 // This allows you to host multiple instances of TSUGI in a
 // single database if your hosting choices are limited.
-$CFG->dbprefix  = '';
+$CFG->dbprefix  = env('TSUGI_DB_PREFIX', '');
 
 // This is the PW that you need to access the Administration
 // features of this application. Protect it like the database
 // password in this file.
 // $CFG->adminpw = 'warning:please-change-adminpw-89b543!';
-$CFG->adminpw = false;
+$CFG->adminpw = env('TSUGI_ADMIN_PASS', false);
 
 // If we are running Embedded Tsugi we need to set the
 // "course title" for the course that represents
@@ -102,31 +107,31 @@ if ( isset($CFG->apphome) ) {
 $CFG->upgrading = false;
 
 // This is how the system will refer to itself.
-$CFG->servicename = 'TSUGI';
-$CFG->servicedesc = false;
+$CFG->servicename = env('TSUGI_SERVICE_NAME', 'TSUGI');
+$CFG->servicedesc = env('TSUGI_SERVICE_DESC', false);
 
 // Information on the owner of this system and whether we 
 // allow folks to request keys for the service
-$CFG->ownername = false;  // 'Charles Severance'
-$CFG->owneremail = false; // 'csev@example.com'
-$CFG->providekeys = false;  // true
+$CFG->ownername = env('TSUGI_OWNER_NAME', false);  // 'Charles Severance'
+$CFG->owneremail = env('TSUGI_OWNER_MAIL', false); // 'csev@example.com'
+$CFG->providekeys = env('TSUGI_PROVIDE_KEYS', false);  // true
 
 // Go to https://console.developers.google.com/apis/credentials
 // create a new OAuth 2.0 credential for a web application, 
 // get the key and secret, and put them here:
-$CFG->google_client_id = false; // '96041-nljpjj8jlv4.apps.googleusercontent.com';
-$CFG->google_client_secret = false; // '6Q7w_x4ESrl29a';
+$CFG->google_client_id = env('TSUGI_GOOGLE_CLIENT_ID', false); // '96041-nljpjj8jlv4.apps.googleusercontent.com';
+$CFG->google_client_secret = env('TSUGI_GOOGLE_CLIENT_SECRET', false); // '6Q7w_x4ESrl29a';
 
 // Go to https://console.developers.google.com/apis/credentials
 // Create and configure an API key and enter it here
-$CFG->google_map_api_key = false; // 'Ve8eH490843cIA9IGl8';
+$CFG->google_map_api_key = env('TSUGI_GOOGLE_MAP_API_KEY', false); // 'Ve8eH490843cIA9IGl8';
 
 // Badge generation settings - once you set these values to something
 // other than false and start issuing badges - don't change these or 
 // existing badge images that have been downloaded from the system 
 // will be invalidated.
-$CFG->badge_encrypt_password = false; // "somethinglongwithhex387438758974987";
-$CFG->badge_assert_salt = false; // "mediumlengthhexstring";
+$CFG->badge_encrypt_password = env('TSUGI_BADGE_ENCRYPT_PASSWORD', false); // "somethinglongwithhex387438758974987";
+$CFG->badge_assert_salt = env('TUSIG_BADGE_ASSERT_SALT', false); // "mediumlengthhexstring";
 
 // This folder contains the badge images - This example
 // is for Embedded Tsugi and the badge images are in the
@@ -146,35 +151,35 @@ $CFG->casa_originator_id = md5($CFG->product_instance_guid);
 // When this is true it enables a Developer test harness that can launch
 // tools using LTI.  It allows quick testing without setting up an LMS
 // course, etc.
-$CFG->DEVELOPER = true;
+$CFG->DEVELOPER = env('TSUGI_DEVELOPER', true);
 
 // These values configure the cookie used to record the overall
 // login in a long-lived encrypted cookie.   Look at the library
 // code createSecureCookie() for more detail on how these operate.
-$CFG->cookiesecret = 'warning:please-change-cookie-secret-a289b543';
-$CFG->cookiename = 'TSUGIAUTO';
-$CFG->cookiepad = '390b246ea9';
+$CFG->cookiesecret = env('TSUGI_COOKIE_SECRET', 'warning:please-change-cookie-secret-a289b543');
+$CFG->cookiename = env('TSUGI_COOKIE_NAME', 'TSUGIAUTO');
+$CFG->cookiepad = env('TSUGI_COOKIE_PAD', '390b246ea9');
 
 // Where the bulk mail comes from - should be a real address with a wildcard box you check
-$CFG->maildomain = false; // 'mail.example.com';
-$CFG->mailsecret = 'warning:please-change-mailsecret-92ds29';
-$CFG->maileol = "\n";  // Depends on your mailer - may need to be \r\n
+$CFG->maildomain = env('TSUGI_MAIL_DOMAIN', false); // 'mail.example.com';
+$CFG->mailsecret = env('TSUGI_MAIL_SECRET', 'warning:please-change-mailsecret-92ds29');
+$CFG->maileol = env('TSUGI_MAILEOL', "\n");  // Depends on your mailer - may need to be \r\n
 
 // Set the nonce clearing factor and expiry time
-$CFG->noncecheck = 100;
-$CFG->noncetime = 1800;
+$CFG->noncecheck = env('TSUGI_NONCE_CHECK', 100);
+$CFG->noncetime = env('TSUGI_NONCE_TIME', 1800);
 
 // This is used to make sure that our constructed session ids
 // based on resource_link_id, oauth_consumer_key, etc are not
 // predictable or guessable.   Just make this a long random string.
 // See LTIX::getCompositeKey() for detail on how this operates.
-$CFG->sessionsalt = "warning:please-change-sessionsalt-89b543";
+$CFG->sessionsalt = env('TSUGI_SESSION_SALT', "warning:please-change-sessionsalt-89b543");
 
 // Timezone
-$CFG->timezone = 'Pacific/Honolulu'; // Nice for due dates
+$CFG->timezone = env('TSUGI_TIMEZONE', 'Pacific/Honolulu'); // Nice for due dates
 
 // Universal Analytics
-$CFG->universal_analytics = false; // "UA-57880800-1";
+$CFG->universal_analytics = env('TSUGI_UNIVERSAL_ANALYTICS', false); // "UA-57880800-1";
 
 // Effectively an "airplane mode" for the appliction.
 // Setting this to true makes it so that when you are completely
@@ -182,7 +187,7 @@ $CFG->universal_analytics = false; // "UA-57880800-1";
 // like Google's map library and hang.  Also the Google login will
 // be faked.  Don't run this in production.
 
-$CFG->OFFLINE = false;
+$CFG->OFFLINE = env('TSUGI_OFFLINE', false);
 
 // In order to run git from the a PHP script, we may need a setuid version
 // of git - example commands:
