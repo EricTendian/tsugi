@@ -255,7 +255,7 @@ array( "{$CFG->dbprefix}lti_nonce",
 
 array( "{$CFG->dbprefix}lti_domain",
 "create table {$CFG->dbprefix}lti_domain (
-    domain_id   INTEGER NOT NULL AUTO_INCREMENT PRIMARY_KEY,
+    domain_id   INTEGER NOT NULL AUTO_INCREMENT PRIMARY KEY,
     key_id      INTEGER NOT NULL,
     context_id  INTEGER NULL,
     domain      VARCHAR(128),
