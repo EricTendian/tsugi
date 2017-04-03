@@ -4,8 +4,6 @@ use \Tsugi\Core\LTIX;
 
 LTIX::getConnection();
 
-$PDOX->query('SET sql_mode=""'); // to allow for MySQL 5.7 compatibility
-
     if ( !isset($maxversion) ) $maxversion = 0;
     if ( !isset($maxpath) ) $maxpath = '';
 
