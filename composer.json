@@ -1,4 +1,6 @@
 {
+    "name": "tsugi/tsugi",
+    "type": "project",
     "require": {
         "vlucas/phpdotenv": "^2.4",
         "illuminate/support": "^5.4",
