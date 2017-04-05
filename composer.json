@@ -10,7 +10,7 @@
     "repositories": [
         {
             "type": "vcs",
-            "url": "https://github.com/EricTendian/tsugi-php.git"
+            "url": "https://github.com/packbackbooks/tsugi-php.git"
         }
     ],
     "config": {
