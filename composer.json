@@ -5,7 +5,7 @@
         "vlucas/phpdotenv": "^2.4",
         "illuminate/support": "^5.1",
         "tsugi/lib": "dev-master",
-        "koseu/lib": "dev-master#4fbb7b8aff07f624132c38f50f299175e3b34fe2"
+        "koseu/lib": "dev-master#e4eaff96c63388d6082cc2b9fcb9cf32bab34e08"
     },
     "repositories": [
         {

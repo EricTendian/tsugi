@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "084ab74940957febca0044d9604d9fa9",
+    "content-hash": "a03aba6bb82a5ec2c490eee9086d1461",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -178,12 +178,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tsugiproject/koseu-php.git",
-                "reference": "4fbb7b8aff07f624132c38f50f299175e3b34fe2"
+                "reference": "e4eaff96c63388d6082cc2b9fcb9cf32bab34e08"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/4fbb7b8aff07f624132c38f50f299175e3b34fe2",
-                "reference": "4fbb7b8aff07f624132c38f50f299175e3b34fe2",
+                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/e4eaff96c63388d6082cc2b9fcb9cf32bab34e08",
+                "reference": "e4eaff96c63388d6082cc2b9fcb9cf32bab34e08",
                 "shasum": ""
             },
             "require": {

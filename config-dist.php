@@ -19,7 +19,7 @@ $wwwroot = "http://localhost/tsugi";
 
 $dirroot = realpath(dirname(__FILE__));
 
-require_once($dirroot."/vendor/autoload.php");
+$loader = require_once($dirroot."/vendor/autoload.php");
 
 if (! function_exists('env')) {
     /**
@@ -73,6 +73,7 @@ global $CFG;
 $CFG = new \Tsugi\Config\ConfigInfo($dirroot, $wwwroot);
 unset($wwwroot);
 unset($dirroot);
+$CFG->loader = $loader;
 if ( $apphome ) $CFG->apphome = $apphome; // Leave unset if not embedded
 unset($apphome);
 
