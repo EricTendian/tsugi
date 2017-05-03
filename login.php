@@ -5,7 +5,6 @@ use \Tsugi\Crypt\SecureCookie;
 
 define('COOKIE_SESSION', true);
 require_once "config.php";
-require_once 'lib/lightopenid/openid.php';
 
 $PDOX = LTIX::getConnection();
 
@@ -132,7 +131,7 @@ if ( $doLogin ) {
     if ( $firstName === false || $lastName === false || $userEmail === false ) {
         error_log('Google-Missing:'.$user_key.','.$firstName.','.$lastName.','.$userEmail);
         $_SESSION["error"] = "You do not have a first name, last name, and email in Google or you did not share it with us.";
-        header('Location: '.$CFG->apphome.'/index.php');
+        header('Location: '.$CFG->apphome.'/');
         return;
     } else {
 
@@ -222,7 +221,7 @@ if ( $doLogin ) {
          if ( $profile_id < 1 ) {
             error_log('Fail-SQL-Profile:'.$user_key.','.$displayName.','.$userEmail.','.$stmt->errorImplode);
             $_SESSION["error"] = "Internal database error, sorry";
-            header('Location: '.$CFG->apphome.'/index.php');
+            header('Location: '.$CFG->apphome.'/');
             return;
          }
 
@@ -278,7 +277,7 @@ if ( $doLogin ) {
         if ( $user_id < 1 ) {
              error_log('No User Entry:'.$user_key.','.$displayName.','.$userEmail);
              $_SESSION["error"] = "Internal database error, sorry";
-             header('Location: '.$CFG->apphome.'/index.php');
+             header('Location: '.$CFG->apphome.'/');
              return;
         }
 
@@ -294,26 +293,64 @@ if ( $doLogin ) {
         }
 
         // We made a user and made a displayname
+        // Set up the session and fake an LTI launch
         $welcome = "Welcome ";
         if ( ! $didinsert ) $welcome .= "back ";
         $_SESSION["success"] = $welcome.($displayName)." (".$userEmail.")";
-        $_SESSION["id"] = $user_id;
-        $_SESSION["user_id"] = $user_id;
-        $_SESSION["user_key"] = $user_key;
-        $_SESSION["email"] = $userEmail;
-        $_SESSION["displayname"] = $displayName;
-        $_SESSION["profile_id"] = $profile_id;
-        if ( isset($userAvatar) ) $_SESSION["avatar"] = $userAvatar;
+
+        // Also set up a fake LTI launch
+        $lti = array();
+        $lti['key_id'] = $google_key_id;
+
         $_SESSION["oauth_consumer_key"] = $oauth_consumer_key;
-        if ( isset($CFG->context_title) ) $_SESSION['context_title'] = $CFG->context_title;
-        if ( isset($context_id) ) $_SESSION["context_id"] = $context_id;
-        if ( isset($context_key) ) $_SESSION["context_key"] = $context_key;
+        $lti['key_key'] = $oauth_consumer_key;
 
         if ( strlen($google_secret) ) {
             $_SESSION['secret'] = LTIX::encrypt_secret($google_secret);
+            $lti['secret'] = LTIX::encrypt_secret($google_secret);
         } else {
             unset($_SESSION['secret']);
         }
+
+        $_SESSION["id"] = $user_id;
+        $lti["user_id"] = $user_id;
+
+        $_SESSION["user_id"] = $user_id;
+        $lti["user_id"] = $user_id;
+
+        $_SESSION["user_key"] = $user_key;
+        $lti["user_key"] = $user_key;
+
+        $_SESSION["email"] = $userEmail;
+        $lti["user_email"] = $userEmail;
+
+        $_SESSION["displayname"] = $displayName;
+        $lti["user_displayname"] = $displayName;
+
+        $_SESSION["profile_id"] = $profile_id;
+        $lti["profile_id"] = $profile_id;
+
+        if ( isset($userAvatar) ) {
+            $_SESSION["avatar"] = $userAvatar;
+            $lti["user_image"] = $userAvatar;
+        }
+
+        if ( isset($CFG->context_title) ) {
+            $_SESSION['context_title'] = $CFG->context_title;
+            $lti['context_title'] = $CFG->context_title;
+            $lti['resource_title'] = $CFG->context_title;
+        }
+        if ( isset($context_id) ) {
+            $_SESSION["context_id"] = $context_id;
+            $lti["context_id"] = $context_id;
+        }
+        if ( isset($context_key) ) {
+            $_SESSION["context_key"] = $context_key;
+            $lti["context_key"] = $context_key;
+        }
+
+        // Set that data in the session.
+        $_SESSION['lti'] = $lti;
 
         // Set the secure cookie
         SecureCookie::set($user_id,$userEmail,$context_id);
@@ -324,7 +361,7 @@ if ( $doLogin ) {
         } else if ( $didinsert ) {
             header('Location: '.$CFG->wwwroot.'/profile.php');
         } else {
-            header('Location: '.$CFG->apphome.'/index.php');
+            header('Location: '.$CFG->apphome.'/');
         }
         return;
     }
