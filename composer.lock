@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "d868504038805d21b5bd02f484e2f6a9",
+    "content-hash": "8db996c1ed72ed6018543ce44e9a39eb",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -178,12 +178,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tsugiproject/koseu-php.git",
-                "reference": "2acac17fec37ffd8d6b78a5252a70c2b5956bce1"
+                "reference": "76d25e4b03d44339d88fe61d2886375258bc8a87"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/2acac17fec37ffd8d6b78a5252a70c2b5956bce1",
-                "reference": "2acac17fec37ffd8d6b78a5252a70c2b5956bce1",
+                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/76d25e4b03d44339d88fe61d2886375258bc8a87",
+                "reference": "76d25e4b03d44339d88fe61d2886375258bc8a87",
                 "shasum": ""
             },
             "require": {
@@ -901,12 +901,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/packbackbooks/tsugi-php.git",
-                "reference": "a3a9163962cc0189b4615c89fa7897538b96e02c"
+                "reference": "8b29f48a8d7445f8728a5e8aca2ce15e4ac37db1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/a3a9163962cc0189b4615c89fa7897538b96e02c",
-                "reference": "a3a9163962cc0189b4615c89fa7897538b96e02c",
+                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/8b29f48a8d7445f8728a5e8aca2ce15e4ac37db1",
+                "reference": "8b29f48a8d7445f8728a5e8aca2ce15e4ac37db1",
                 "shasum": ""
             },
             "require": {
@@ -941,7 +941,7 @@
             "support": {
                 "source": "https://github.com/packbackbooks/tsugi-php/tree/master"
             },
-            "time": "2017-05-03T16:54:56+00:00"
+            "time": "2017-05-03T16:59:05+00:00"
         },
         {
             "name": "twig/twig",
