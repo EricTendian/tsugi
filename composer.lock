@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "8db996c1ed72ed6018543ce44e9a39eb",
+    "content-hash": "553e98a695bd78d69338f172afbb808a",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -178,19 +178,19 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tsugiproject/koseu-php.git",
-                "reference": "76d25e4b03d44339d88fe61d2886375258bc8a87"
+                "reference": "4cb7224adc69adfb00a528df0fe51c136deac920"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/76d25e4b03d44339d88fe61d2886375258bc8a87",
-                "reference": "76d25e4b03d44339d88fe61d2886375258bc8a87",
+                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/4cb7224adc69adfb00a528df0fe51c136deac920",
+                "reference": "4cb7224adc69adfb00a528df0fe51c136deac920",
                 "shasum": ""
             },
             "require": {
-                "php": ">=7.0.0",
-                "silex/silex": "~2.0",
-                "tsugi/lib": ">=0.3.1",
-                "twig/twig": "~2.0"
+                "php": ">=5.5.0",
+                "silex/silex": "v2.0.4",
+                "symfony/translation": "v3.2.7",
+                "tsugi/lib": ">=0.3.1"
             },
             "type": "library",
             "autoload": {
@@ -217,7 +217,7 @@
             ],
             "description": "A Next Generation Embeddable Learning Management System",
             "homepage": "http://www.koseu.org/",
-            "time": "2017-03-19T14:57:40+00:00"
+            "time": "2017-05-10T20:20:38+00:00"
         },
         {
             "name": "paragonie/random_compat",

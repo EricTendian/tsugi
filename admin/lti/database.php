@@ -46,7 +46,7 @@ array( "{$CFG->dbprefix}lti_key",
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
 
     UNIQUE(key_sha256),
     PRIMARY KEY (key_id)
@@ -64,12 +64,14 @@ array( "{$CFG->dbprefix}lti_context",
 
     title               TEXT NULL,
 
+    lessons             MEDIUMTEXT NULL,
+
     json                MEDIUMTEXT NULL,
     settings            MEDIUMTEXT NULL,
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
 
     CONSTRAINT `{$CFG->dbprefix}lti_context_ibfk_1`
         FOREIGN KEY (`key_id`)
@@ -97,7 +99,7 @@ array( "{$CFG->dbprefix}lti_link",
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
 
     CONSTRAINT `{$CFG->dbprefix}lti_link_ibfk_1`
         FOREIGN KEY (`context_id`)
@@ -120,6 +122,7 @@ array( "{$CFG->dbprefix}lti_user",
     displayname         TEXT NULL,
     email               TEXT NULL,
     locale              CHAR(63) NULL,
+    image               TEXT NULL,
     subscribe           SMALLINT NULL,
 
     json                MEDIUMTEXT NULL,
@@ -128,7 +131,7 @@ array( "{$CFG->dbprefix}lti_user",
     ipaddr              VARCHAR(64),
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_user_ibfk_1`
         FOREIGN KEY (`key_id`)
@@ -153,7 +156,7 @@ array( "{$CFG->dbprefix}lti_membership",
 
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_membership_ibfk_1`
         FOREIGN KEY (`context_id`)
@@ -182,7 +185,7 @@ array( "{$CFG->dbprefix}lti_service",
     json                MEDIUMTEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     CONSTRAINT `{$CFG->dbprefix}lti_service_ibfk_1`
         FOREIGN KEY (`key_id`)
@@ -216,7 +219,7 @@ array( "{$CFG->dbprefix}lti_result",
     json               MEDIUMTEXT NULL,
     entity_version     INTEGER NOT NULL DEFAULT 0,
     created_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at         TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at         TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     retrieved_at       DATETIME NULL,
 
     CONSTRAINT `{$CFG->dbprefix}lti_result_ibfk_1`
@@ -276,6 +279,7 @@ array( "{$CFG->dbprefix}lti_domain",
         REFERENCES `{$CFG->dbprefix}lti_context` (`context_id`)
         ON DELETE CASCADE ON UPDATE CASCADE,
 
+    PRIMARY KEY (domain_id),
     UNIQUE(key_id, context_id, domain, port)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
 
@@ -291,6 +295,7 @@ array( "{$CFG->dbprefix}profile",
 
     displayname         TEXT NULL,
     email               TEXT NULL,
+    image               TEXT NULL,
     locale              CHAR(63) NULL,
     subscribe           SMALLINT NULL,
 
@@ -298,7 +303,7 @@ array( "{$CFG->dbprefix}profile",
     login_at            DATETIME NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
-    updated_at          TIMESTAMP NOT NULL DEFAULT 0,
+    updated_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
 
     UNIQUE(profile_id, profile_sha256),
     PRIMARY KEY (profile_id)
@@ -316,9 +321,10 @@ $DATABASE_POST_CREATE = function($table) {
         echo("Post-create: ".$sql."<br/>\n");
         $q = $PDOX->queryDie($sql);
 
-        // Secret is null for the google key - no direct launches or logins allowed
-        $sql = "insert into {$CFG->dbprefix}lti_key (key_sha256, key_key) values
-            ( 'd4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f', 'google.com')";
+        // Secret is big ugly string for the google key - in case we launch internally in Koseu
+        $secret = bin2hex(openssl_random_pseudo_bytes(16));
+        $sql = "insert into {$CFG->dbprefix}lti_key (key_sha256, secret, key_key) values
+            ( 'd4c9d9027326271a89ce51fcaf328ed673f17be33469ff979e8ab8dd501e664f', '$secret', 'google.com')";
         error_log("Post-create: ".$sql);
         echo("Post-create: ".$sql."<br/>\n");
         $q = $PDOX->queryDie($sql);
@@ -603,9 +609,35 @@ $DATABASE_UPGRADE = function($oldversion) {
         }
     }
 
+    // Version 201705032130 - Add secret for google key if it is not there
+    if ( $oldversion < 201705032130 ) {
+        $secret = bin2hex(openssl_random_pseudo_bytes(16));
+        $sql= "UPDATE {$CFG->dbprefix}lti_key SET secret='$secret' WHERE key_key = 'google.com' AND secret IS NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryReturnError($sql);
+    }
+
+    // Version 201705101135 - Add image and lessons fields
+    if ( $oldversion < 201705101135 ) {
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_user ADD image TEXT NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+        $sql= "ALTER TABLE {$CFG->dbprefix}profile ADD image TEXT NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_context ADD lessons MEDIUMTEXT NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+    }
+
+
     // When you increase this number in any database.php file,
     // make sure to update the global value in setup.php
-    return 201703171713;
+    return 201705101135;
 
 }; // Don't forget the semicolon on anonymous functions :)
 
