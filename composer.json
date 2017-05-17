@@ -6,7 +6,7 @@
         "illuminate/support": "^5.1",
         "tsugi/lib": "dev-master",
         "twig/twig": "~2.0",
-        "koseu/lib": "dev-master#4cb7224adc69adfb00a528df0fe51c136deac920"
+        "koseu/lib": "dev-master"
     },
     "repositories": [
         {

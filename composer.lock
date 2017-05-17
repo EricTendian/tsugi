@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file",
         "This file is @generated automatically"
     ],
-    "content-hash": "553e98a695bd78d69338f172afbb808a",
+    "content-hash": "a8fe1bf7f352c162d3205bead7928520",
     "packages": [
         {
             "name": "doctrine/inflector",
@@ -901,12 +901,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/packbackbooks/tsugi-php.git",
-                "reference": "b1a548dc0d513e5090d88e81dd6bb4a0084db0e0"
+                "reference": "e94854d20f3421bd3ba8686fced4dafe20401850"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/b1a548dc0d513e5090d88e81dd6bb4a0084db0e0",
-                "reference": "b1a548dc0d513e5090d88e81dd6bb4a0084db0e0",
+                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/e94854d20f3421bd3ba8686fced4dafe20401850",
+                "reference": "e94854d20f3421bd3ba8686fced4dafe20401850",
                 "shasum": ""
             },
             "require": {
@@ -941,7 +941,7 @@
             "support": {
                 "source": "https://github.com/packbackbooks/tsugi-php/tree/master"
             },
-            "time": "2017-05-15T15:17:09+00:00"
+            "time": "2017-05-17T21:34:21+00:00"
         },
         {
             "name": "twig/twig",

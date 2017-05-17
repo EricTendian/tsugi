@@ -162,6 +162,10 @@ $CFG->providekeys = env('TSUGI_PROVIDE_KEYS', false);  // true
 $CFG->google_client_id = env('TSUGI_GOOGLE_CLIENT_ID', false); // '96041-nljpjj8jlv4.apps.googleusercontent.com';
 $CFG->google_client_secret = env('TSUGI_GOOGLE_CLIENT_SECRET', false); // '6Q7w_x4ESrl29a';
 
+// Whether or not to unify accounts between global site-wide login
+// and LTI launches
+$CFG->unify = true;
+
 // Go to https://console.developers.google.com/apis/credentials
 // Create and configure an API key and enter it here
 $CFG->google_map_api_key = env('TSUGI_GOOGLE_MAP_API_KEY', false); // 'Ve8eH490843cIA9IGl8';

@@ -1,7 +1,7 @@
 <?php
 
 define('COOKIE_SESSION', true);
-require_once('config.php');
+require_once('../config.php');
 
 // Make PHP paths pretty .../install => install.php
 $router = new Tsugi\Util\FileRouter();

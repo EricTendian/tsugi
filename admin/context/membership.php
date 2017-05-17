@@ -1,10 +1,11 @@
 <?php
 // In the top frame, we use cookies for session.
-define('COOKIE_SESSION', true);
+if (!defined('COOKIE_SESSION')) define('COOKIE_SESSION', true);
 require_once("../../config.php");
 require_once("../../admin/admin_util.php");
 
 use \Tsugi\UI\Table;
+use \Tsugi\Core\LTIX;
 
 \Tsugi\Core\LTIX::getConnection();
 
@@ -12,7 +13,7 @@ header('Content-Type: text/html; charset=utf-8');
 session_start();
 
 if ( ! isAdmin() ) {
-    $_SESSION['login_return'] = $CFG->getUrlFull(__FILE__) . "/index.php";
+    $_SESSION['login_return'] = LTIX::curPageUrlFolder();
     header('Location: '.$CFG->wwwroot.'/login.php');
     return;
 }
@@ -22,7 +23,7 @@ $query_parms = false;
 $searchfields = array("membership_id", "context_id", "user_id", "role", "role_override", 
 	"created_at", "updated_at", "email", "displayname", "user_key");
 
-$sql = "SELECT membership_id AS Membership, context_id AS Context, M.user_id as User, 
+$sql = "SELECT membership_id, 'detail' AS 'Membership', context_id AS Context, M.user_id as User, 
             role, role_override, M.created_at, M.updated_at, email, displayname, user_key
         FROM {$CFG->dbprefix}lti_membership as M
         JOIN {$CFG->dbprefix}lti_user AS U ON M.user_id = U.user_id
@@ -50,11 +51,11 @@ $OUTPUT->topNav();
 $OUTPUT->flashMessages();
 ?>
 <p>
-  <a href="index.php" class="btn btn-default">View Contexts</a>
+  <a href="<?= LTIX::curPageUrlFolder() ?>" class="btn btn-default">View Contexts</a>
 </p>
 <?php
 
-Table::pagedTable($newrows, $searchfields);
+Table::pagedTable($newrows, $searchfields, $searchfields, "member-detail");
 
 $OUTPUT->footer();
 

@@ -11,24 +11,32 @@ use \Tsugi\UI\CrudForm;
 header('Content-Type: text/html; charset=utf-8');
 session_start();
 
-if ( ! ( isset($_SESSION['id']) || isAdmin() ) ) {
-    die('Must be logged in or admin');
+if ( ! isAdmin() ) {
+    die('Must be admin');
 }
 
-$tablename = "{$CFG->dbprefix}lti_key";
+if ( ! isset($_REQUEST['membership_id']) ) {
+    die('No membership_id');
+}
+
+$row = $PDOX->rowDie("SELECT context_id FROM {$CFG->dbprefix}lti_membership
+    WHERE membership_id = :MID;",
+    array(':MID' => $_REQUEST['membership_id'])
+);
+
+if ( $row === false || ! isset($row['context_id']) ) {
+    die('Bad membership_id');
+}
+
+
+$tablename = "{$CFG->dbprefix}lti_membership";
 $current = $CFG->getCurrentFileUrl(__FILE__);
-$from_location = "keys";
+$from_location = "membership?context_id=".$row['context_id'];
 $allow_delete = true;
 $allow_edit = true;
 $where_clause = '';
 $query_fields = array();
-if ( isAdmin() ) {
-    $fields = array("key_id", "key_key", "secret", "created_at", "updated_at", "user_id");
-} else {
-    $fields = array("key_id", "key_key", "secret", "created_at", "updated_at");
-    $where_clause .= "user_id = :UID";
-    $query_fields[":UID"] = $_SESSION['id'];
-}
+$fields = array("membership_id", "context_id", "user_id", "role_override", "created_at", "updated_at");
 
 // Handle the post data
 $row =  CrudForm::handleUpdate($tablename, $fields, $where_clause,
@@ -44,7 +52,7 @@ $OUTPUT->bodyStart();
 $OUTPUT->topNav();
 $OUTPUT->flashMessages();
 
-$title = "Key Entry";
+$title = "Membership";
 echo("<h1>$title</h1>\n<p>\n");
 $retval = CrudForm::updateForm($row, $fields, $current, $from_location, $allow_edit, $allow_delete);
 if ( is_string($retval) ) die($retval);
