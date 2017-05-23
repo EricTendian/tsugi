@@ -178,12 +178,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/tsugiproject/koseu-php.git",
-                "reference": "4cb7224adc69adfb00a528df0fe51c136deac920"
+                "reference": "1e03c2d8c1134026bf762e9c5f704f5c8539db99"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/4cb7224adc69adfb00a528df0fe51c136deac920",
-                "reference": "4cb7224adc69adfb00a528df0fe51c136deac920",
+                "url": "https://api.github.com/repos/tsugiproject/koseu-php/zipball/1e03c2d8c1134026bf762e9c5f704f5c8539db99",
+                "reference": "1e03c2d8c1134026bf762e9c5f704f5c8539db99",
                 "shasum": ""
             },
             "require": {
@@ -217,7 +217,7 @@
             ],
             "description": "A Next Generation Embeddable Learning Management System",
             "homepage": "http://www.koseu.org/",
-            "time": "2017-05-10T20:20:38+00:00"
+            "time": "2017-05-17T16:07:22+00:00"
         },
         {
             "name": "paragonie/random_compat",
@@ -901,12 +901,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/packbackbooks/tsugi-php.git",
-                "reference": "e94854d20f3421bd3ba8686fced4dafe20401850"
+                "reference": "171ef05c078fba4bfa766c32385cfc560a0a0954"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/e94854d20f3421bd3ba8686fced4dafe20401850",
-                "reference": "e94854d20f3421bd3ba8686fced4dafe20401850",
+                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/171ef05c078fba4bfa766c32385cfc560a0a0954",
+                "reference": "171ef05c078fba4bfa766c32385cfc560a0a0954",
                 "shasum": ""
             },
             "require": {
@@ -941,7 +941,7 @@
             "support": {
                 "source": "https://github.com/packbackbooks/tsugi-php/tree/master"
             },
-            "time": "2017-05-17T21:34:21+00:00"
+            "time": "2017-05-23T21:47:51+00:00"
         },
         {
             "name": "twig/twig",
