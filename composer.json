@@ -5,7 +5,7 @@
         "vlucas/phpdotenv": "^2.4",
         "illuminate/support": "^5.1",
         "tsugi/lib": "dev-master",
-        "twig/twig": "~2.0",
+        "twig/twig": "~1.27",
         "koseu/lib": "dev-master"
     },
     "repositories": [
