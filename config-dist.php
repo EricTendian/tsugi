@@ -1,5 +1,6 @@
 <?php
 
+
 // Configuration file - copy from config-dist.php to config.php
 // and then edit.  Since config.php has passwords and other secrets
 // never check config.php into a source repository
@@ -14,7 +15,7 @@ $wwwroot = "http://localhost/tsugi";
 // $apphome = "http://localhost/tsugi-org";
 // $apphome = "http://localhost:8888/tsugi-org"
 // $apphome = "https://www.tsugi.org";
-// $wwwhost = $apphome . '/tsugi';
+// $wwwhome = $apphome . '/tsugi';
 // Make sure to check for all the "Embedded Tsugi" configuration options below
 
 $dirroot = realpath(dirname(__FILE__));
@@ -232,6 +233,18 @@ $CFG->universal_analytics = env('TSUGI_UNIVERSAL_ANALYTICS', false); // "UA-5788
 // be faked.  Don't run this in production.
 
 $CFG->OFFLINE = env('TSUGI_OFFLINE', false);
+
+// IMS says that resource_link_id, lti_message_type, and lti_version are required fields, 
+// and IMS certification fails if we allow a valid launch when either 
+// of these are not sent (even though in many instances, an application 
+// can happily do what it needs to do without them). 
+// Set these to true to make launches fail when either/both are not sent.
+$CFG->require_conformance_parameters = true;
+
+// A consumer may pass both the LTI 1 lis_outcome_service_url 
+// and the LTI 2 custom_result_url; in this case we have to decide which
+// to use for the gradeSend service.  The LTI 1 method is more established...
+$CFG->prefer_lti1_for_grade_send = true;
 
 // In order to run git from the a PHP script, we may need a setuid version
 // of git - example commands:

@@ -6,6 +6,11 @@
         "illuminate/support": "^5.1",
         "tsugi/lib": "dev-master",
         "twig/twig": "~1.27",
+        "symfony/debug": "v3.2.8",
+        "symfony/http-foundation": "v3.2.8",
+        "symfony/event-dispatcher": "v3.2.8",
+        "symfony/http-kernel": "v3.2.8",
+        "symfony/routing": "v3.2.8",
         "koseu/lib": "dev-master"
     },
     "repositories": [
