@@ -5,6 +5,8 @@ $DATABASE_UNINSTALL = array(
 "drop table if exists {$CFG->dbprefix}lti_service",
 "drop table if exists {$CFG->dbprefix}lti_membership",
 "drop table if exists {$CFG->dbprefix}lti_link",
+"drop table if exists {$CFG->dbprefix}lti_link_activity",
+"drop table if exists {$CFG->dbprefix}lti_link_user_activity",
 "drop table if exists {$CFG->dbprefix}lti_context",
 "drop table if exists {$CFG->dbprefix}lti_user",
 "drop table if exists {$CFG->dbprefix}lti_key",
@@ -59,6 +61,8 @@ array( "{$CFG->dbprefix}lti_context",
     context_sha256      CHAR(64) NOT NULL,
     context_key         TEXT NOT NULL,
     deleted             TINYINT(1) NOT NULL DEFAULT 0,
+
+    secret              CHAR(64) NULL,
 
     key_id              INTEGER NOT NULL,
 
@@ -116,6 +120,27 @@ array( "{$CFG->dbprefix}lti_link",
     UNIQUE(link_sha256, context_id),
     PRIMARY KEY (link_id)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
+
+array( "{$CFG->dbprefix}lti_link_activity",
+"create table {$CFG->dbprefix}lti_link_activity (
+    link_id             INTEGER NOT NULL,
+    event               INTEGER NOT NULL,
+
+    link_count          INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    activity            VARBINARY(1024) NULL,
+
+    entity_version      INTEGER NOT NULL DEFAULT 0,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
+
+    CONSTRAINT `{$CFG->dbprefix}lti_link_activity_ibfk_1`
+        FOREIGN KEY (`link_id`)
+        REFERENCES `{$CFG->dbprefix}lti_link` (`link_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    PRIMARY KEY (link_id,event)
+) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
+
 
 array( "{$CFG->dbprefix}lti_user",
 "create table {$CFG->dbprefix}lti_user (
@@ -180,6 +205,32 @@ array( "{$CFG->dbprefix}lti_membership",
 
     UNIQUE(context_id, user_id),
     PRIMARY KEY (membership_id)
+) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
+
+array( "{$CFG->dbprefix}lti_link_user_activity",
+"create table {$CFG->dbprefix}lti_link_user_activity (
+    link_id             INTEGER NOT NULL,
+    user_id             INTEGER NOT NULL,
+    event               INTEGER NOT NULL,
+
+    link_user_count     INTEGER UNSIGNED NOT NULL DEFAULT 0,
+    activity            VARBINARY(1024) NULL,
+
+    entity_version      INTEGER NOT NULL DEFAULT 0,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
+
+    CONSTRAINT `{$CFG->dbprefix}lti_link_user_activity_ibfk_1`
+        FOREIGN KEY (`link_id`)
+        REFERENCES `{$CFG->dbprefix}lti_link` (`link_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    CONSTRAINT `{$CFG->dbprefix}lti_link_user_activity_ibfk_2`
+        FOREIGN KEY (`user_id`)
+        REFERENCES `{$CFG->dbprefix}lti_user` (`user_id`)
+        ON DELETE CASCADE ON UPDATE CASCADE,
+
+    PRIMARY KEY (link_id, user_id, event)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
 
 array( "{$CFG->dbprefix}lti_service",
@@ -558,7 +609,7 @@ $DATABASE_UPGRADE = function($oldversion) {
     // by pre Jan-2017 login.php mistakenly assuming that the 
     // ID returned by Google was "permanent" - so now in 
     // profile, we use email as primary key.
-    $checkSQL = "SELECT profile_id, email, created_at FROM {$CFG->dbprefix}profile WHERE email IN (SELECT T.E FROM (select profile_id AS I, email AS E,COUNT(profile_sha256) as C FROM {$CFG->dbprefix}profile GROUP BY email ORDER BY C DESC) AS T WHERE T.C > 1) ORDER BY email DESC, created_at DESC;";
+    $checkSQL = "SELECT profile_id, email, created_at FROM {$CFG->dbprefix}profile WHERE email IN (SELECT T.E FROM (select profile_id AS I, email AS E,COUNT(profile_sha256) as C FROM {$CFG->dbprefix}profile GROUP BY profile_id, email ORDER BY C DESC) AS T WHERE T.C > 1) ORDER BY email DESC, created_at DESC;";
     $stmt = $PDOX->queryReturnError($checkSQL);
     if ( ! $stmt->success ) {
         echo("Fail checking duplicate profile entries:<br/>\n");
@@ -743,9 +794,53 @@ $DATABASE_UPGRADE = function($oldversion) {
         }
     }
 
+    // Add the secret column
+    if ( $oldversion < 201708101745 ) {
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_context MODIFY updated_at TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00'";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_context ADD secret CHAR(64) NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+        $sql= "UPDATE {$CFG->dbprefix}lti_context SET secret=SUBSTR(CONCAT(MD5(RAND()),MD5(RAND())),1,64)";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+    }
+
+    // Clean up the mess - not very likely - because it was only for two hours
+    // TODO: Delete this in a few weeks
+    if ( $oldversion == 201708132146 || $oldversion == 201708132246) {
+
+        $sql = 'DROP TABLE lti_link_activity';
+        echo("Dropping to re-create: ".$sql."<br/>\n");
+        error_log("Dropping to re-create: ".$sql);
+        $q = $PDOX->queryReturnError($sql);
+        if ( ! $q->success ) {
+            $message = "Error: ".$q->errorImplode;
+            error_log($message);
+            echo($message."\n");
+        }
+
+        $sql = 'DROP TABLE lti_link_user_activity';
+        echo("Dropping to re-create: ".$sql."<br/>\n");
+        error_log("Dropping to re-create: ".$sql);
+        $q = $PDOX->queryReturnError($sql);
+        if ( ! $q->success ) {
+            $message = "Error: ".$q->errorImplode;
+            error_log($message);
+            echo($message."\n");
+        }
+
+        echo("Please Re-Run Database Upgrade to recreate these tables\n");
+
+    }
+
     // When you increase this number in any database.php file,
     // make sure to update the global value in setup.php
-    return 201706111750;
+    return 201708132345;
 
 }; // Don't forget the semicolon on anonymous functions :)
 

@@ -65,7 +65,7 @@ if ( $goodsession && isset($_POST['title']) && isset($_POST['lti']) &&
 }
 
 $query_parms = false;
-$searchfields = array("request_id", "title", "notes", "state", "admin", "created_at", "updated_at");
+$searchfields = array("request_id", "title", "notes", "state", "admin", "email", "displayname", "R.created_at", "R.updated_at");
 $sql = "SELECT request_id, title, notes, state, admin, R.created_at, R.updated_at, email, displayname
         FROM {$CFG->dbprefix}key_request  as R
         JOIN {$CFG->dbprefix}lti_user AS U ON R.user_id = U.user_id ";
@@ -99,11 +99,15 @@ $OUTPUT->flashMessages();
 ?>
 <h1>LTI Key Requests</h1>
 <p>
+  <a href="<?= LTIX::curPageUrlFolder() ?>" class="btn btn-default active">View Key Requests</a>
   <a href="keys" class="btn btn-default">View Keys</a>
-  <a href="#" class="btn btn-default" onclick="
-    showModal('Using this key', 'about-div');
-    return false;
-">Using Your Key</a>
+  <a href="using" class="btn btn-default">Using Your Key</a>
+</p>
+<p>
+If you are a teacher and want to use the interactive elements on this web
+site using IMS Learning Tools Interoperability, you can request a key
+form this page.  Please include a description of how you are 
+planning on using your key.
 </p>
 <?php if ( $goodsession ) { ?>
 <div class="modal fade" id="request">
@@ -229,15 +233,8 @@ use the following registration URL:
 </div>
 
 <?php } ?>
-<?php if ( count($newrows) < 1 ) { ?>
-<p>
-This server hosts various tools that can be integrated into a learning system
-using the IMS Learning Tools Interoperability standard.  You can use this page
-to request access to this service.
-</p>
-<?php } else {
+<?php 
     Table::pagedTable($newrows, $searchfields, false, "request-detail");
-}
 if ( $goodsession ) { ?>
 <p>
 <button type="button" class="btn btn-default" onclick="$('#request').modal();return false;">New Key Request</button>

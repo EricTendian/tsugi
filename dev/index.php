@@ -4,6 +4,7 @@ if ( ! defined('COOKIE_SESSION') ) define('COOKIE_SESSION', true);
 require_once("../config.php");
 require_once("../admin/admin_util.php");
 
+use \Tsugi\Util\U;
 use \Tsugi\Util\LTI;
 use \Tsugi\Core\LTIX;
 use \Tsugi\Config\ConfigInfo;
@@ -105,7 +106,7 @@ if ( isset($_POST['instructor']) ) {
 }
 
 // Set up default LTI data
-$key = isset($_REQUEST['key']) ? trim($_REQUEST["key"]) : $key; // UPDATE FORM JOSH HARINGTON TO PERSIST USER DEFINED KEY
+$key = isset($_REQUEST['key']) ? trim($_REQUEST["key"]) : $key; // UPDATE FROM JOSH HARINGTON TO PERSIST USER DEFINED KEY
 $secret = isset($_REQUEST["secret"]) ? trim($_REQUEST["secret"]) : "secret";
 $endpoint = isset($_REQUEST["endpoint"]) ? trim($_REQUEST["endpoint"]) : false;
 if ( $endpoint == 'false' ) $endpoint = false;
@@ -223,7 +224,7 @@ $OUTPUT->bodyStart(false);
                     if ( strpos($tool,"../") === 0 ) $toolname = substr($tool,3);
                     if ( strpos($tool,"http") !== 0 ) {
                         $tool = $CFG->wwwroot . '/' . $toolname;
-                        $tool = ConfigInfo::removeRelativePath($tool);
+                        $tool = U::remove_relative_path($tool);
                     }
                     echo('<li><a href="#" onclick="doSubmitTool(\''.$tool.'\');return false;">'.$toolname.'</a></li>'."\n");
                 }
@@ -234,6 +235,7 @@ $OUTPUT->bodyStart(false);
                 }
                 ?>
                 <li class="divider"></li>
+                <li><a href="basecheck.php" target="_blank">Base String Checker</a></li>
                 <li><a href="https://github.com/tsugitools" target="_blank">Available Tsugi Tools</a></li>
                 <li><a href="https://github.com/tsugicontrib" target="_blank">Contributed Tsugi Tools</a></li>
                 <li><a href="http://developers.imsglobal.org/" target="_blank">IMS LTI Documentation</a></li>
@@ -277,6 +279,7 @@ echo("<br/>Key: <input type\"text\" name=\"key\" $disabled size=\"60\" value=\"$
 echo("<br/>Secret: <input type\"text\" name=\"secret\" $disabled size=\"60\" value=\"$secret\">\n");
 echo("</fieldset><p>");
 echo("<fieldset><legend>Launch Data</legend>\n");
+ksort($lmsdata);
 foreach ($lmsdata as $k => $val ) {
     echo($k.": <input id=\"".$k."\" type=\"text\" size=\"30\" name=\"".$k."\" value=\"");
     echo(htmlspecialchars($val));
@@ -308,7 +311,7 @@ $parms['lis_outcome_service_url'] = $outcomes;
 if ( isset($_POST['endpoint']) && (isset($_POST['launch']) || isset($_POST['debug']) ) ) {
     // Use the actual direct URL to the launch
     $endpoint = $_POST['endpoint'];
-    $endpoint = ConfigInfo::removeRelativePath($endpoint);
+    $endpoint = U::remove_relative_path($endpoint);
     $parms = LTI::signParameters($parms, $endpoint, "POST", $key, $secret,
         "Finish Launch", $tool_consumer_instance_guid, $tool_consumer_instance_description);
 

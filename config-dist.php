@@ -1,6 +1,5 @@
 <?php
 
-
 // Configuration file - copy from config-dist.php to config.php
 // and then edit.  Since config.php has passwords and other secrets
 // never check config.php into a source repository
@@ -167,6 +166,9 @@ $CFG->google_client_secret = env('TSUGI_GOOGLE_CLIENT_SECRET', false); // '6Q7w_
 // and LTI launches
 $CFG->unify = true;
 
+// Whether to record launches as activities - make sure tables exist
+$CFG->launchactivity = false;
+
 // Go to https://console.developers.google.com/apis/credentials
 // Create and configure an API key and enter it here
 $CFG->google_map_api_key = env('TSUGI_GOOGLE_MAP_API_KEY', false); // 'Ve8eH490843cIA9IGl8';
@@ -241,17 +243,33 @@ $CFG->OFFLINE = env('TSUGI_OFFLINE', false);
 // Set these to true to make launches fail when either/both are not sent.
 $CFG->require_conformance_parameters = true;
 
+// Since IMS certification is capricious at times and has bugs or bad assumptions,
+// set this when running certification
+$CFG->certification = false;
+
 // A consumer may pass both the LTI 1 lis_outcome_service_url 
 // and the LTI 2 custom_result_url; in this case we have to decide which
 // to use for the gradeSend service.  The LTI 1 method is more established...
 $CFG->prefer_lti1_for_grade_send = true;
 
 // In order to run git from the a PHP script, we may need a setuid version
-// of git - example commands:
+// of git - example commands if you are not root:
 //
 //    cd /home/csev
 //    cp /usr/bin/git .
 //    chmod a+s git
+//
+// If you are root, your web area and git must belong to the user that owns
+// the web process.  You can check this using:
+// 
+// apache2ctl -S
+//  ..
+//  User: name="www-data" id=33
+//  Group: name="www-data" id=33
+//
+// cd /var/www/html
+// chown -R 33:33 site-folder
+// chown 33:33 /home/csev/git
 //
 // This of course is something to consider carefully.
 // $CFG->git_command = '/home/csev/git';

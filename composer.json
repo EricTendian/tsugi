@@ -13,6 +13,7 @@
         "symfony/event-dispatcher": "v3.2.8",
         "symfony/http-kernel": "v3.2.8",
         "symfony/routing": "v3.2.8",
+        "pimple/pimple": "v3.0.2",
         "koseu/lib": "dev-master"
     },
     "repositories": [
