@@ -12,6 +12,7 @@ $DATABASE_UNINSTALL = array(
 "drop table if exists {$CFG->dbprefix}lti_key",
 "drop table if exists {$CFG->dbprefix}lti_nonce",
 "drop table if exists {$CFG->dbprefix}lti_domain",
+"drop table if exists {$CFG->dbprefix}lti_event",
 "drop table if exists {$CFG->dbprefix}profile"
 );
 
@@ -44,12 +45,16 @@ array( "{$CFG->dbprefix}lti_key",
     tool_profile    MEDIUMTEXT NULL,
     new_tool_profile  MEDIUMTEXT NULL,
 
+    caliper_url         TEXT NULL,
+    caliper_key         TEXT NULL,
+
     json                MEDIUMTEXT NULL,
     settings            MEDIUMTEXT NULL,
     settings_url        TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
+    login_at            DATETIME NULL,
 
     UNIQUE(key_sha256),
     PRIMARY KEY (key_id)
@@ -77,9 +82,10 @@ array( "{$CFG->dbprefix}lti_context",
     settings_url        TEXT NULL,
     ext_memberships_id  TEXT NULL,
     ext_memberships_url TEXT NULL,
-    memberships_url     TEXT NULL,  
-    lineitems_url       TEXT NULL,  
+    memberships_url     TEXT NULL,
+    lineitems_url       TEXT NULL,
     entity_version      INTEGER NOT NULL DEFAULT 0,
+    login_at            DATETIME NULL,
     created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
     updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
 
@@ -205,6 +211,31 @@ array( "{$CFG->dbprefix}lti_membership",
 
     UNIQUE(context_id, user_id),
     PRIMARY KEY (membership_id)
+) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
+
+// "FIFO" buffer of events no explicit foreign key
+// relationships as these are short-lived records
+array( "{$CFG->dbprefix}lti_event",
+"create table {$CFG->dbprefix}lti_event (
+    event_id        INTEGER NOT NULL AUTO_INCREMENT,
+    event           INTEGER NOT NULL,
+
+    state           SMALLINT NULL,
+
+    link_id         INTEGER NULL,
+    key_id          INTEGER NULL,
+    context_id      INTEGER NULL,
+    user_id         INTEGER NULL,
+
+    nonce           BINARY(16) NULL,
+    launch          MEDIUMTEXT NULL,
+    json            MEDIUMTEXT NULL,
+
+    entity_version      INTEGER NOT NULL DEFAULT 0,
+    created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    updated_at          TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00',
+
+    PRIMARY KEY (event_id)
 ) ENGINE = InnoDB DEFAULT CHARSET=utf8"),
 
 array( "{$CFG->dbprefix}lti_link_user_activity",
@@ -551,7 +582,7 @@ $DATABASE_UPGRADE = function($oldversion) {
     // Version 201505222100 improvements
     if ( $oldversion < 201505222100 ) {
         $tables = array('lti_key', 'lti_context', 'lti_link', 'lti_user',
-            'lti_nonce', 'lti_membership', 'lti_service', 
+            'lti_nonce', 'lti_membership', 'lti_service',
             'lti_result', 'profile');
         foreach ( $tables as $table ) {
             $sql= "ALTER TABLE {$CFG->dbprefix}{$table} ADD entity_version INTEGER NOT NULL DEFAULT 0";
@@ -606,8 +637,8 @@ $DATABASE_UPGRADE = function($oldversion) {
     }
 
     // Checking for incorrect duplicate profile entries created
-    // by pre Jan-2017 login.php mistakenly assuming that the 
-    // ID returned by Google was "permanent" - so now in 
+    // by pre Jan-2017 login.php mistakenly assuming that the
+    // ID returned by Google was "permanent" - so now in
     // profile, we use email as primary key.
     $checkSQL = "SELECT profile_id, email, created_at FROM {$CFG->dbprefix}profile WHERE email IN (SELECT T.E FROM (select profile_id AS I, email AS E,COUNT(profile_sha256) as C FROM {$CFG->dbprefix}profile GROUP BY profile_id, email ORDER BY C DESC) AS T WHERE T.C > 1) ORDER BY email DESC, created_at DESC;";
     $stmt = $PDOX->queryReturnError($checkSQL);
@@ -794,7 +825,7 @@ $DATABASE_UPGRADE = function($oldversion) {
         }
     }
 
-    // Add the secret column
+    // Add the context secret column (for incoming grades)
     if ( $oldversion < 201708101745 ) {
         $sql= "ALTER TABLE {$CFG->dbprefix}lti_context MODIFY updated_at TIMESTAMP NOT NULL DEFAULT '1970-01-02 00:00:00'";
         echo("Upgrading: ".$sql."<br/>\n");
@@ -838,9 +869,33 @@ $DATABASE_UPGRADE = function($oldversion) {
 
     }
 
+    // Add the caliper columns
+    if ( $oldversion < 201708161530 ) {
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_key ADD caliper_url TEXT NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_key ADD caliper_key TEXT NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+    }
+
+    // Add the login_at columns
+    if ( $oldversion < 201709201530 ) {
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_key ADD login_at DATETIME NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+        $sql= "ALTER TABLE {$CFG->dbprefix}lti_context ADD login_at DATETIME NULL";
+        echo("Upgrading: ".$sql."<br/>\n");
+        error_log("Upgrading: ".$sql);
+        $q = $PDOX->queryDie($sql);
+    }
+
     // When you increase this number in any database.php file,
     // make sure to update the global value in setup.php
-    return 201708132345;
+    return 201709201530;
 
 }; // Don't forget the semicolon on anonymous functions :)
 

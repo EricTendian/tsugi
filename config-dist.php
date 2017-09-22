@@ -124,16 +124,16 @@ $CFG->adminpw = env('TSUGI_ADMIN_PASS', false);
 // table creation as well as making lists of tools in various UI places
 // such as ContentItem or LTI 2.0
 
-// For nomal tsugi, by default we use the built-in admin tools, and 
+// For nomal tsugi, by default we use the built-in admin tools, and
 // install new tools (see /admin/install/) into mod.
 $CFG->tool_folders = array("admin", "mod");
-$CFG->install_folder = $CFG->dirroot.'/mod'; 
+$CFG->install_folder = $CFG->dirroot.'/mod';
 
 // For Embedded Tsugi, you probably want to ignore the mod folder
 // in /tsugi and instead install new tools into "mod" in the parent folder
 if ( isset($CFG->apphome) ) {
     $CFG->tool_folders = array("admin", "../tools", "../mod");
-    $CFG->install_folder = $CFG->dirroot.'/../mod'; 
+    $CFG->install_folder = $CFG->dirroot.'/../mod';
 }
 
 // You can also include tool/module folders that are outside of this folder
@@ -150,14 +150,14 @@ $CFG->upgrading = false;
 $CFG->servicename = env('TSUGI_SERVICE_NAME', 'TSUGI');
 $CFG->servicedesc = env('TSUGI_SERVICE_DESC', false);
 
-// Information on the owner of this system and whether we 
+// Information on the owner of this system and whether we
 // allow folks to request keys for the service
 $CFG->ownername = env('TSUGI_OWNER_NAME', false);  // 'Charles Severance'
 $CFG->owneremail = env('TSUGI_OWNER_MAIL', false); // 'csev@example.com'
 $CFG->providekeys = env('TSUGI_PROVIDE_KEYS', false);  // true
 
 // Go to https://console.developers.google.com/apis/credentials
-// create a new OAuth 2.0 credential for a web application, 
+// create a new OAuth 2.0 credential for a web application,
 // get the key and secret, and put them here:
 $CFG->google_client_id = env('TSUGI_GOOGLE_CLIENT_ID', false); // '96041-nljpjj8jlv4.apps.googleusercontent.com';
 $CFG->google_client_secret = env('TSUGI_GOOGLE_CLIENT_SECRET', false); // '6Q7w_x4ESrl29a';
@@ -169,13 +169,22 @@ $CFG->unify = true;
 // Whether to record launches as activities - make sure tables exist
 $CFG->launchactivity = false;
 
+// Controlling the event FIFO
+// If eventcheck is false, no events will be logged and no cleanup will be done.
+$CFG->eventcheck = 1000;       // How many launches between FIFO truncation (probabilistic)
+$CFG->eventtime = 7*24*60*60;  // Length in seconds of the FIFO
+
+// Set eventpushtime to zero to suppress auto-push from the FIFO
+$CFG->eventpushtime = 2;      // Maximum number of seconds to push during heartbeat
+$CFG->eventpushcount = 50;    // Maximum number of events to push during heartbeat
+
 // Go to https://console.developers.google.com/apis/credentials
 // Create and configure an API key and enter it here
 $CFG->google_map_api_key = env('TSUGI_GOOGLE_MAP_API_KEY', false); // 'Ve8eH490843cIA9IGl8';
 
 // Badge generation settings - once you set these values to something
-// other than false and start issuing badges - don't change these or 
-// existing badge images that have been downloaded from the system 
+// other than false and start issuing badges - don't change these or
+// existing badge images that have been downloaded from the system
 // will be invalidated.
 $CFG->badge_encrypt_password = env('TSUGI_BADGE_ENCRYPT_PASSWORD', false); // "somethinglongwithhex387438758974987";
 $CFG->badge_assert_salt = env('TUSIG_BADGE_ASSERT_SALT', false); // "mediumlengthhexstring";
@@ -236,10 +245,10 @@ $CFG->universal_analytics = env('TSUGI_UNIVERSAL_ANALYTICS', false); // "UA-5788
 
 $CFG->OFFLINE = env('TSUGI_OFFLINE', false);
 
-// IMS says that resource_link_id, lti_message_type, and lti_version are required fields, 
-// and IMS certification fails if we allow a valid launch when either 
-// of these are not sent (even though in many instances, an application 
-// can happily do what it needs to do without them). 
+// IMS says that resource_link_id, lti_message_type, and lti_version are required fields,
+// and IMS certification fails if we allow a valid launch when either
+// of these are not sent (even though in many instances, an application
+// can happily do what it needs to do without them).
 // Set these to true to make launches fail when either/both are not sent.
 $CFG->require_conformance_parameters = true;
 
@@ -247,7 +256,7 @@ $CFG->require_conformance_parameters = true;
 // set this when running certification
 $CFG->certification = false;
 
-// A consumer may pass both the LTI 1 lis_outcome_service_url 
+// A consumer may pass both the LTI 1 lis_outcome_service_url
 // and the LTI 2 custom_result_url; in this case we have to decide which
 // to use for the gradeSend service.  The LTI 1 method is more established...
 $CFG->prefer_lti1_for_grade_send = true;
@@ -261,7 +270,7 @@ $CFG->prefer_lti1_for_grade_send = true;
 //
 // If you are root, your web area and git must belong to the user that owns
 // the web process.  You can check this using:
-// 
+//
 // apache2ctl -S
 //  ..
 //  User: name="www-data" id=33
@@ -273,6 +282,17 @@ $CFG->prefer_lti1_for_grade_send = true;
 //
 // This of course is something to consider carefully.
 // $CFG->git_command = '/home/csev/git';
+
+// Should we record launch activity - multi-bucket lossy historgram
+$CFG->launchactivity = true;
+
+// how many launches between event cleanups (probabilistic)
+$CFG->eventcheck = 200;        // Set to false to suspend event recording
+$CFG->eventtime = 7*24*60*60;  // Length in seconds of the event buffer
+
+// Maximum events to push in a batch
+$CFG->eventpushcount = 50;     // Set to zero to suspend event push
+$CFG->eventpushtime = 2;       // Maximum length in seconds to push events
 
 // The vendor include and root - generally leave these alone
 // unless you have a very custom checkout

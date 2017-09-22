@@ -18,10 +18,15 @@ $l = new Lessons($CFG->lessons);
 // Check if this is a remote import from Canvas
 if ( isset($_POST['ext_content_return_url']) ) {
     $return_url = $_POST['ext_content_return_url'];
-    $return_url .= strpos($return_url,'?') === false ? '?' : '&';
-    $return_url .= "return_type=file&text=". urlencode($CFG->servicename) . "&url=";
-    $return_url .= urlencode($CFG->wwwroot . '/cc/export');
-    $return_url .= '&tsugi_lms=canvas';
+    $return_url = U::add_url_parm($return_url, 'return_type', 'file');
+    $return_url = U::add_url_parm($return_url, 'text', $CFG->servicename);
+
+    $export_url = $CFG->wwwroot . '/cc/export?tsugi_lms=canvas';
+    $export_url_youtube = U::add_url_parm($export_url, 'youtube', 'yes');
+
+    $return_url_normal = U::add_url_parm($return_url, 'url', $export_url);
+    $return_url_youtube = U::add_url_parm($return_url, 'url', $export_url_youtube);
+
     $OUTPUT->header();
     $OUTPUT->bodystart(false);
     echo("<p>Course: ".htmlentities($l->lessons->title)."</p>\n");
@@ -40,10 +45,28 @@ if ( isset($_POST['ext_content_return_url']) ) {
     echo("<p>Resources: $resource_count </p>\n");
     echo("<p>Assignments: $assignment_count </p>\n");
     echo("<center>\n");
-    echo('<a href="'.$return_url.'" role="button" class="btn btn-success">Import Course</a>');
+    echo('<a href="'.$return_url_normal.'" role="button" class="btn btn-success">Import Course</a>');
+    if ( isset($CFG->youtube_url) ) {
+            echo('<br/><a href="'.$return_url_youtube.'" role="button" class="btn btn-success">Import Course With Tracked YouTube URLs</a>');
+    }
     echo("</center>\n");
     $OUTPUT->footer();
     return;
+}
+
+// Check to see if we are building a cartridge for a subset
+$anchor_str = U::get($_GET, 'anchors', false);
+$anchors = false;
+if ( $anchor_str ) $anchors = explode(',', $anchor_str);
+if ( count($anchors) < 1 ) $anchors = false;
+$anchor_count = 0;
+if ( $anchors ) {
+    foreach($l->lessons->modules as $module) {
+        if ( in_array($module->anchor, $anchors) ) {
+            $anchor_count++;
+        }
+    }
+    if ( $anchor_count < 1 ) $anchors = false;
 }
 
 // here we go...
@@ -60,8 +83,9 @@ if ( ! isCli() ) {
     header( "Content-Disposition: attachment; filename=\"".$service."_export.imscc\"" );
 }
 
-$tsugi_lms = false;
-if ( isset($_GET['tsugi_lms']) ) $tsugi_lms = $_GET['tsugi_lms'];
+$tsugi_lms = U::get($_GET,'tsugi_lms', false);
+$youtube = U::get($_GET,'youtube', false);
+if ( $youtube != 'yes' ) $youtube = false;
 
 $cc_dom = new CC();
 $cc_dom->set_title($CFG->context_title.' import');
@@ -74,6 +98,7 @@ if ( $tsugi_lms == 'sakai' ) {
 
 foreach($l->lessons->modules as $module) {
     if ( isCli() ) echo("title=$module->title\n");
+    if ( $anchors && ! in_array($module->anchor, $anchors) ) continue;
     if ( $top_module ) {
         $sub_module = $cc_dom->add_sub_module($top_module,$module->title);
     } else {
@@ -83,8 +108,16 @@ foreach($l->lessons->modules as $module) {
     if ( isset($module->videos) ) {
         foreach($module->videos as $video ) {
             $title = 'Video: '.$video->title;
-            $url = 'https://www.youtube.com/watch?v=' . $video->youtube;
-            $cc_dom->zip_add_url_to_module($zip, $sub_module, $title, $url);
+            if ( $youtube && isset($CFG->youtube_url) ) {
+                $custom_arr = array();
+                $endpoint = U::absolute_url($CFG->youtube_url);
+                $endpoint = U::add_url_parm($endpoint, 'v', $video->youtube);
+                $extensions = array('apphome' => $CFG->apphome);
+                $cc_dom->zip_add_lti_to_module($zip, $sub_module, $title, $endpoint, $custom_arr, $extensions);
+            } else {
+                $url = 'https://www.youtube.com/watch?v=' . $video->youtube;
+                $cc_dom->zip_add_url_to_module($zip, $sub_module, $title, $url);
+            }
         }
     }
 
@@ -133,7 +166,7 @@ foreach($l->lessons->modules as $module) {
             // Sigh - some LMSs don't handle custom - sigh
             $endpoint = U::add_url_parm($endpoint, 'inherit', $lti->resource_link_id);
             $extensions = array('apphome' => $CFG->apphome);
-            $cc_dom->zip_add_lti_to_module($zip, $sub_module, $title, $endpoint, $custom_arr, $extensions);
+            $cc_dom->zip_add_lti_outcome_to_module($zip, $sub_module, $title, $endpoint, $custom_arr, $extensions);
         }
     }
 }
