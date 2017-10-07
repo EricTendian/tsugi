@@ -1006,12 +1006,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/packbackbooks/tsugi-php.git",
-                "reference": "aca351c40a617cd450c619a8ae0fc1cafdeb3f36"
+                "reference": "8fc29bf00faf30cdf8618c842566c9fb8901d7d1"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/aca351c40a617cd450c619a8ae0fc1cafdeb3f36",
-                "reference": "aca351c40a617cd450c619a8ae0fc1cafdeb3f36",
+                "url": "https://api.github.com/repos/packbackbooks/tsugi-php/zipball/8fc29bf00faf30cdf8618c842566c9fb8901d7d1",
+                "reference": "8fc29bf00faf30cdf8618c842566c9fb8901d7d1",
                 "shasum": ""
             },
             "require": {
@@ -1046,7 +1046,7 @@
             "support": {
                 "source": "https://github.com/packbackbooks/tsugi-php/tree/master"
             },
-            "time": "2017-09-25T02:41:48+00:00"
+            "time": "2017-10-07T03:26:58+00:00"
         },
         {
             "name": "twig/twig",
