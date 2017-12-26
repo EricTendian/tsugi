@@ -14,6 +14,10 @@
         "symfony/http-kernel": "v3.2.8",
         "symfony/routing": "v3.2.8",
         "pimple/pimple": "v3.0.2",
+        "aws/aws-sdk-php": "v3.38.1",
+      	"google/apiclient" : "v2.2.1",
+        "google/apiclient-services" : "v0.36",
+        "google/auth" : "v1.1.0",
         "koseu/lib": "dev-master"
     },
     "repositories": [

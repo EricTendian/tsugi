@@ -110,6 +110,10 @@ $CFG->dbprefix  = env('TSUGI_DB_PREFIX', '');
 // $CFG->adminpw = 'warning:please-change-adminpw-89b543!';
 $CFG->adminpw = env('TSUGI_ADMIN_PASS', false);
 
+// Some styles from Bootswatch
+// $CFG->bootswatch = 'cerulean';
+// $CFG->bootswatch_color = rand(0,52);  // Fun color changing navigation for cerulian :)
+
 // If we are running Embedded Tsugi we need to set the
 // "course title" for the course that represents
 // the "local" students that log in through Google.
@@ -150,6 +154,9 @@ $CFG->upgrading = false;
 $CFG->servicename = env('TSUGI_SERVICE_NAME', 'TSUGI');
 $CFG->servicedesc = env('TSUGI_SERVICE_DESC', false);
 
+// A logo for the site, this works best if it is a real URL 
+// $CFG->logo_url = 'https://www.wa4e.com/logo.png';
+
 // Information on the owner of this system and whether we
 // allow folks to request keys for the service
 $CFG->ownername = env('TSUGI_OWNER_NAME', false);  // 'Charles Severance'
@@ -161,6 +168,19 @@ $CFG->providekeys = env('TSUGI_PROVIDE_KEYS', false);  // true
 // get the key and secret, and put them here:
 $CFG->google_client_id = env('TSUGI_GOOGLE_CLIENT_ID', false); // '96041-nljpjj8jlv4.apps.googleusercontent.com';
 $CFG->google_client_secret = env('TSUGI_GOOGLE_CLIENT_SECRET', false); // '6Q7w_x4ESrl29a';
+
+// Alpha: Google Classroom support
+// First, Go to https://console.developers.google.com/apis/credentials
+// And add access to "Google Classroom API" to your google_client_id (above)
+
+// Set the secret to a long random string - this is used for internal
+// url Tsugi signing - not for Google interactions.  Don't change it
+// once you set it.
+// $CFG->google_classroom_secret = 'oLKJHi....jkhgJGHJGH';
+
+// This should be an absolute URL that will be used to generate previews
+// in Google Classroom
+// $CFG->logo_url = 'https://www.wa4e.com/logo.png';
 
 // Whether or not to unify accounts between global site-wide login
 // and LTI launches
@@ -192,7 +212,8 @@ $CFG->badge_assert_salt = env('TUSIG_BADGE_ASSERT_SALT', false); // "mediumlengt
 // This folder contains the badge images - This example
 // is for Embedded Tsugi and the badge images are in the
 // parent folder.
-// $CFG->badge_path = $CFG->dirroot . '/../badges';
+// $CFG->badge_path = $CFG->dirroot . '/../bimages';
+// $CFG->badge_url = $CFG->apphome . '/bimages';
 
 // From LTI 2.0 spec: A globally unique identifier for the service provider.
 // As a best practice, this value should match an Internet domain name
@@ -293,6 +314,60 @@ $CFG->eventtime = 7*24*60*60;  // Length in seconds of the event buffer
 // Maximum events to push in a batch
 $CFG->eventpushcount = 50;     // Set to zero to suspend event push
 $CFG->eventpushtime = 2;       // Maximum length in seconds to push events
+
+// Storing sessions in a database - Should be a different database or at least
+// a different connection since the PdoSessionHandler messes with how the connection
+// handles transactions for its own purposes.
+
+/*  CREATE TABLE sessions (
+        sess_id VARCHAR(128) NOT NULL PRIMARY KEY,
+        sess_data BLOB NOT NULL,
+        sess_time INTEGER UNSIGNED NOT NULL,
+        sess_lifetime MEDIUMINT NOT NULL,
+        created_at          TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+        updated_at          TIMESTAMP NULL
+    ) COLLATE utf8_bin, ENGINE = InnoDB;
+*/
+// Keep this false until the main Tsugi tables are created or admin will break
+$CFG->sessions_in_db = false;
+if ( $CFG->sessions_in_db ) {
+    // $session_save_pdo = new PDO($db_pdo, $db_dbuser, $db_dbpass);
+    $session_save_pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    session_set_save_handler(
+        new \Symfony\Component\HttpFoundation\Session\Storage\Handler\PdoSessionHandler(
+            $session_save_pdo,
+            array('db_table' => $CFG->dbprefix . "sessions")
+        )
+    );
+}
+
+// Storing Sessions in DynamoDB - Beta
+// http://docs.aws.amazon.com/aws-sdk-php/v2/guide/feature-dynamodb-session-handler.html
+$CFG->aws_key = false;  // 'FLDKJKJHFDKLJFKLJHFD';
+$CFG->aws_secret = false;  // 'zjJ84djDSKJdsjk/88KHashsKASHKAShdHDKDHhd';
+$CFG->sessions_in_dynamodb = true;
+
+if ( $CFG->sessions_in_dynamodb ) {
+    $dynamoDb = \Aws\DynamoDb\DynamoDbClient::factory(
+        array('region' => 'us-east-2',
+        'credentials' => array(
+            'key'    => $CFG->aws_key,
+            'secret' => $CFG->aws_secret
+        ),
+        'version' => 'latest'));
+    $sessionHandler = $dynamoDb->registerSessionHandler(array(
+        'table_name'               => 'sessions',
+        'hash_key'                 => 'id',
+        'session_lifetime'         => 3600,
+        'consistent_read'          => true,
+        'locking_strategy'         => null,
+        'automatic_gc'             => 0,
+        'gc_batch_size'            => 50,
+        'max_lock_wait_time'       => 15,
+        'min_lock_retry_microtime' => 5000,
+        'max_lock_retry_microtime' => 50000,
+    ));
+}
 
 // The vendor include and root - generally leave these alone
 // unless you have a very custom checkout
